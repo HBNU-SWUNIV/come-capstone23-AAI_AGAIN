@@ -7,16 +7,21 @@
 
 ## <u>Teamate</u> Project Background
 - ### 필요성
-  - OOO
-  - OOO
+  - 많은 빅테크 기업과 연구소는 한국어 기반 LLM을 출시하고 있지만 그에 따른 성능은 그다지 좋지 못한 편이다.
+  - 이에 따라 사용자의 의도를 파악하고 응답하는 한국어, 영어 기반 Multi-lingual LLM을 개발한다.
+  - 사용자의 편의성을 위해 해당 LLM을 Gradio를 활용해 웹 어플리케이션으로 배포한다
 - ### 기존 해결책의 문제점
-  - OOO
-  - OOO
+  - 기존의 Open-sourced MLLM은 Vocab에서 한국어가 차지하는 비율이 작다.
+  - 또한, Pretrained된 데이터는 주로 라틴어 계열인 영어, 불어가 주를 이루어 학습되었다.
   
 ## System Design
   - ### System Requirements
     - OOO
     - OOO
+## Model Architecture
+<p align="center">
+  <img src="figs/model_architecture.png" alt="모델 아키텍쳐" width="50%" />
+</p>
     
 ## Case Study
   - ### Description
