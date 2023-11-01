@@ -28,7 +28,7 @@
   - 고품질 한국어, 영어 Instruction 데이터 셋을 활용하여 Instruction Tuning
     
 ## Case Study
-  - ### Description
+  - ### Word Embedding의 Vocaburaly를 확장
   
   
 ## Conclusion
