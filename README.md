@@ -29,6 +29,11 @@
     
 ## Case Study
   - ### Word Embedding의 Vocaburaly를 확장
+    - Hai Wang, Dian Yu, Kai Sun, Janshu Chen, and Dong Yu. 2019. Improving pre-trained multilin- gual models with vocabulary expansion.
+  - ### Multi-lingual Pretraining을 통한 지식 전이
+    - Mikel Artetxe, Gorka Labaka, and Eneko Agirre. 2017. Learning bilingual word embeddings with (almost) no bilingual data.
+  - ### Instructin Tuning은 데이터 셋의 크기보다 데이터의 질이 중요
+    -  Chunting Zhou, Pengfei Liu, Puxin Xu, Srini Iyer, Jiao Sun, Yuning Mao, Xuezhe Ma, Avia Efrat, Ping Yu, Lili Yu, Susan Zhang, Gargi Ghosh, Mike Lewis, Luke Zettlemoyer, and Omer Levy. 2023. Lima: Less is more for alignment.
   
   
 ## Conclusion
