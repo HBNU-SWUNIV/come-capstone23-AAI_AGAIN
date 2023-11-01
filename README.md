@@ -19,9 +19,12 @@
     - OOO
     - OOO
 ## Model Architecture
-<p align="center">
-  <img src="figs/model_architecture.png" alt="모델 아키텍쳐" width="50%" />
-</p>
+  <p align="center">
+    <img src="figs/model_architecture.png" alt="모델 아키텍쳐" width="50%" />
+  </p>
+  - 기존의 LLaMA2 vocabulary에 KoBERT vocaburaly를 병합하여 새로운 임베딩을 구축
+  - 한국어, 영어 데이터를 7:3 비율로 총 33GB 추가 pretraining 진행
+  - 고품질 한국어, 영어 Instruction 데이터 셋을 활용하여 Instruction Tuning
     
 ## Case Study
   - ### Description
