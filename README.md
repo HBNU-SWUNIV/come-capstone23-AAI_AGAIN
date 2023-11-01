@@ -16,11 +16,12 @@
   
 ## System Design
   - ### System Requirements
-Python 3.10.12 \n
-torch 2.0.1
-Peft 0.5.0
-CUDA 11.7
-GPU : A6000 48G x 7
+- Python 3.10.12
+- torch 2.0.1
+- Peft 0.5.0
+- CUDA 11.7
+- GPU : A6000 48G x 7
+
 ## Model Architecture
   <p align="center">
     <img src="figs/model_architecture.png" alt="모델 아키텍쳐" width="50%" />
