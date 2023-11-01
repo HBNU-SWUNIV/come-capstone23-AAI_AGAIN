@@ -54,4 +54,6 @@
 </p>
   
 ## Project Outcome
-- ### 20XX 년 OO학술대회 
+- ### 2023 International Conference on Artificial Intelligence in Information and Communication (ICAIIC) 논문 1건 출판
+- ### 2023 한국정보과학회 학술대회 KCC 논문 1건 출판 
+- ### 2024 LREC Colling 2건 (심사중) 
