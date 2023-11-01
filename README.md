@@ -16,7 +16,7 @@
   
 ## System Design
   - ### System Requirements
-Python 3.10.12
+Python 3.10.12 \n
 torch 2.0.1
 Peft 0.5.0
 CUDA 11.7
