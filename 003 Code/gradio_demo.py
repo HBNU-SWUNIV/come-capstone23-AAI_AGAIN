@@ -3,8 +3,12 @@ from transformers import (
     LlamaForCausalLM,
     LlamaTokenizer,
     StoppingCriteria,
-    BitsAndBytesConfig
+    BitsAndBytesConfig,
+    AutoModelForCausalLM,
+    AutoTokenizer
 )
+from transformers import AutoModel
+model = AutoModel.from_pretrained("Teddysum/bllossom-1.01-13b", token="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")
 import gradio as gr
 import argparse
 import os
@@ -18,7 +22,12 @@ from typing import Iterable, List
 import subprocess
 import re
 
-DEFAULT_SYSTEM_PROMPT = """You are a helpful assistant. 당신은 유능한 AI 어시스턴트 입니다."""
+import pygame
+import os
+
+
+# DEFAULT_SYSTEM_PROMPT = """You are a helpful assistant. 당신은 유능한 AI 어시스턴트 입니다."""
+DEFAULT_SYSTEM_PROMPT = """You are a helpful assistant. 당신은 훌륭한 비서입니다."""
 
 TEMPLATE_WITH_SYSTEM_PROMPT = (
     "[INST] <<SYS>>\n"
@@ -140,7 +149,7 @@ def setup():
 
         if args.tokenizer_path is None:
             args.tokenizer_path = args.base_model
-        tokenizer = LlamaTokenizer.from_pretrained(args.tokenizer_path, legacy=True)
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_path, legacy=True)
 
         print("Start launch vllm server.")
         cmd = f"python -m vllm.entrypoints.api_server \
@@ -165,9 +174,9 @@ def setup():
             args.tokenizer_path = args.lora_model
             if args.lora_model is None:
                 args.tokenizer_path = args.base_model
-        tokenizer = LlamaTokenizer.from_pretrained(args.tokenizer_path, legacy=True)
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_path, legacy=True)
 
-        base_model = LlamaForCausalLM.from_pretrained(
+        base_model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
             torch_dtype=load_type,
             low_cpu_mem_usage=True,
@@ -460,91 +469,168 @@ def predict(
                 yield history
                 if len(next_token_ids) >= max_new_tokens:
                     break
+       
+def update_textbox(radio_selection):
+    return radio_selection
 
 
-# Call the setup function to initialize the components
+def reset_prompt_input():
+    return gr.update(value='')
+
+def complete_loading(output_data):
+    # output_data는 text_input.submit()에서 반환된 결과입니다.
+
+    print("작업 완료:", output_data)
+    # 여기에서 추가적으로 UI 업데이트나 상태 메시지 변경 등을 수행할 수 있습니다.
+    return "작업이 성공적으로 완료되었습니다."
+
+import gradio as gr
+
+from gradio.themes.base import Base
+from gradio.themes.utils.colors import Color
+from gradio.themes.utils import colors, fonts, sizes
+from gradio import Theme
+from gradio.themes.base import Base
+
+
+theme = gr.themes.Default(primary_hue="neutral").set(
+    loader_color="#c4e1c7",
+    slider_color="#c4e1c7",
+    button_primary_background_fill="#c4e1c7",
+    button_primary_background_fill_hover="#c4e1c7",
+    body_background_fill="#fffef8",
+    block_title_text_weight="600",
+    block_border_width="3px",
+    checkbox_background_color_selected="#a3bba5",
+    checkbox_border_color = "neutral",
+    block_label_text_weight="600",
+    block_label_text_size="13px",
+    checkbox_label_padding="5px",
+    button_large_padding="10px",
+    button_small_padding="10px",
+    
+)
+
+current_option = ["다음 문장을 영어로 번역해줘", "다음 문장을 한국어로 번역해줘", "다음 메뉴를 만드는 레시피를 설명해줘", "해당 지역의 갈만한 여행지를 추천해줘"]
+
+def option(input_text):
+    global current_option  # Declare current_option as global
+    current_option += [input_text]  # Add the new option
+    print(current_option)
+    return current_option
 setup()
 
+def reset():
+    return [None]
 
-# Create the Gradio interface
-with gr.Blocks() as demo:
+image_path = os.path.join("/home/hslim/scripts/inference", "aai_logo.png")
+
+import base64
+
+# 이미지를 Base64로 인코딩
+with open("/home/hslim/scripts/inference/aai_logo.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+
+
+
+with gr.Blocks(theme=theme) as demo:
     github_banner_path = 'https://github.com/teddysum/bllossom/blob/main/bllossom_icon.png?raw=true'
-    gr.HTML(f'<p align="center"><a href="https://github.com/teddysum/bllossom"><img src={github_banner_path} width="700"/></a></p>')
-    chatbot = gr.Chatbot()
-    with gr.Row():
-        with gr.Column(scale=4):
-            with gr.Column(scale=3):
-                system_prompt_input = gr.Textbox(
-                    show_label=True,
-                    label="시스템 프롬프트",
-                    placeholder=DEFAULT_SYSTEM_PROMPT,
-                    lines=1).style(
-                    container=True)
-                negative_prompt_input = gr.Textbox(
-                    show_label=True,
-                    label="역방향 제시어(대화 시작 전 또는 과거 기록 비운 후에만 수정 유효, 대화 중 수정 무효)",
-                    placeholder="(선택 사항, 기본적으로 비어 있음)",
-                    lines=1,
-                    visible=ENABLE_CFG_SAMPLING).style(
-                    container=True)
+    gr.HTML(f'<p align="center"><a href="https://github.com/teddysum/bllossom"><img src="data:image/png;base64,{encoded_string}" width="200"/></a></p>')
+
+
+    with gr.Column():
+        with gr.Row():
+            with gr.Row():
+                with gr.Column():
+                    radio = gr.Radio(choices = current_option, label="프롬프트")
+                with gr.Column():
+                    reset_button = gr.Button("Reset")
+
+            with gr.Column(scale = 8):
+                chatbot = gr.Chatbot([],
+                elem_id="AAI AGAIN",
+                bubble_full_width=False,
+                avatar_images=(None, (os.path.join("/home/hslim/scripts/inference", "chatbot_image.png")))
+                )
+            with gr.Column(scale = 2):
+                max_new_token = gr.Slider(
+                    0,
+                    4096,
+                    value=512,
+                    step=1.0,
+                    label="Maximum New Token Length",
+                    interactive=True)
+                top_p = gr.Slider(0, 1, value=0.9, step=0.01,
+                                label="Top P", interactive=True,elem_classes ="token_body")
+                temperature = gr.Slider(
+                    0,
+                    1,
+                    value=0.2,
+                    step=0.01,
+                    label="Temperature",
+                    interactive=True)
+                top_k = gr.Slider(1, 40, value=40, step=1,
+                                label="Top K", interactive=True,elem_classes ="token_body")
+                do_sample = gr.Checkbox(
+                    value=True,
+                    label="Do Sample",
+                    info="use random sample strategy",
+                    interactive=True)
+                repetition_penalty = gr.Slider(
+                    1.0,
+                    3.0,
+                    value=1.1,
+                    step=0.1,
+                    label="Repetition Penalty",
+                    interactive=True,
+                    visible=False if args.use_vllm else True)
+                guidance_scale = gr.Slider(
+                    1.0,
+                    3.0,
+                    value=1.0,
+                    step=0.1,
+                    label="Guidance Scale",
+                    interactive=True,
+                    visible=ENABLE_CFG_SAMPLING)
+                presence_penalty = gr.Slider(
+                    -2.0,
+                    2.0,
+                    value=1.0,
+                    step=0.1,
+                    label="Presence Penalty",
+                    interactive=True,
+                    visible=True if args.use_vllm else False)
+                
+    with gr.Column():
+        with gr.Row():
             with gr.Column(scale=12):
                 user_input = gr.Textbox(
                     show_label=True,
                     label="질문하세요!",
                     placeholder="Shift + Enter를 눌러 메시지 보내기...",
-                    lines=10).style(
+                    lines=5,
                     container=True)
+        with gr.Row():
             with gr.Column(min_width=32, scale=1):
-                submitBtn = gr.Button("Submit", variant="primary")
-        with gr.Column(scale=1):
-            emptyBtn = gr.Button("Clear History")
-            max_new_token = gr.Slider(
-                0,
-                4096,
-                value=512,
-                step=1.0,
-                label="Maximum New Token Length",
-                interactive=True)
-            top_p = gr.Slider(0, 1, value=0.9, step=0.01,
-                              label="Top P", interactive=True)
-            temperature = gr.Slider(
-                0,
-                1,
-                value=0.2,
-                step=0.01,
-                label="Temperature",
-                interactive=True)
-            top_k = gr.Slider(1, 40, value=40, step=1,
-                              label="Top K", interactive=True)
-            do_sample = gr.Checkbox(
-                value=True,
-                label="Do Sample",
-                info="use random sample strategy",
-                interactive=True)
-            repetition_penalty = gr.Slider(
-                1.0,
-                3.0,
-                value=1.1,
-                step=0.1,
-                label="Repetition Penalty",
-                interactive=True,
-                visible=False if args.use_vllm else True)
-            guidance_scale = gr.Slider(
-                1.0,
-                3.0,
-                value=1.0,
-                step=0.1,
-                label="Guidance Scale",
-                interactive=True,
-                visible=ENABLE_CFG_SAMPLING)
-            presence_penalty = gr.Slider(
-                -2.0,
-                2.0,
-                value=1.0,
-                step=0.1,
-                label="Presence Penalty",
-                interactive=True,
-                visible=True if args.use_vllm else False)
+                submitBtn = gr.Button("입력", variant="primary")
+            with gr.Column(min_width=32, scale=1):
+                emptyBtn = gr.Button("Clear History")
+            
+        with gr.Column(scale=3):
+            system_prompt_input = gr.Textbox(
+                show_label=False,
+                label="시스템 프롬프트",
+                placeholder=DEFAULT_SYSTEM_PROMPT,
+                lines=1, visible = False,
+                container=False)
+            negative_prompt_input = gr.Textbox(
+                show_label=True,
+                label="역방향 제시어(대화 시작 전 또는 과거 기록 비운 후에만 수정 유효, 대화 중 수정 무효)",
+                placeholder="(선택 사항, 기본적으로 비어 있음)",
+                lines=1,
+                visible=False,
+                container=True)
+
 
     params = [user_input, chatbot]
     predict_params = [
@@ -574,6 +660,7 @@ with gr.Blocks() as demo:
         [user_input],
         queue=False)
 
+
     user_input.submit(
         user,
         params,
@@ -592,6 +679,39 @@ with gr.Blocks() as demo:
 
     emptyBtn.click(reset_state, outputs=[chatbot], show_progress=True)
 
+    #radio.change(fn=update_textbox, inputs=radio, outputs=user_input)
+    radio.change(fn=update_textbox, inputs=radio, outputs=system_prompt_input)
+
+    reset_button.click(
+    fn=reset,  # 클릭 시 실행할 함수
+    inputs=[],  # 입력이 없음
+    outputs=[radio]  # 라디오 버튼을 업데이트할 출력
+    )
+    
+'''
+    text_input.submit(fn=option, inputs=[text_input], outputs=[radio]).then(
+    complete_loading,  # 추가 작업을 정의하는 함수
+    outputs=[radio]) 
+
+    pro_submitBtn.click(fn=reset_prompt_input, inputs=[text_input], outputs=[radio]).then(
+    option,  # 추가 작업을 정의하는 함수    
+    outputs=[radio])
+
+    pro_submitBtn.click(
+    fn=option, 
+    inputs=[text_input], 
+    outputs=[]
+    ).then(
+    lambda new_options: gr.update(choices=new_options),
+    None,
+    [radio])
+'''
+     
+    #ext_input.submit(fn=option, inputs=[text_input], outputs=[radio])
+
+    
+
+
 
 # Launch the Gradio interface
 demo.queue().launch(
@@ -599,3 +719,4 @@ demo.queue().launch(
     inbrowser=True,
     server_name='0.0.0.0',
     server_port=port)
+ 
